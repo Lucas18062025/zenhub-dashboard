@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZenHub - Panel de Productividad Personal</title>
+  <!-- Google Fonts: Outfit for titles, Inter for UI text -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-dark-glass">
+  <div class="background-decorations">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="logo">
+          <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <h1>ZenHub</h1>
+        </div>
+        <div class="greeting-container">
+          <h2 id="greeting-text">Cargando saludo...</h2>
+          <p id="date-text" class="subtext">Cargando fecha...</p>
+        </div>
+      </div>
+      
+      <div class="header-right">
+        <!-- Theme Switcher -->
+        <div class="theme-selector">
+          <button class="selector-btn" id="theme-btn" aria-label="Cambiar tema">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.01-2.512a15.968 15.968 0 000-2.512m0 2.512l-3.388 1.62m5.01-4.132a3 3 0 115.78-1.128 2.25 2.25 0 012.4-2.245 4.5 4.5 0 00-8.4 2.245c0 .399.078.78.22 1.128zm0 0a15.997 15.997 0 013.388 1.62m-5.01 2.512a15.967 15.967 0 010 2.512m0-2.512l-3.388-1.62m5.01-4.132a15.97 15.97 0 013.279-3.279m0 0a15.97 15.97 0 013.279 3.279m-6.558 0a15.978 15.978 0 010 6.558m0 0a15.97 15.97 0 01-3.279 3.279m0 0a15.97 15.97 0 01-3.279-3.279m6.558 0a15.978 15.978 0 000-6.558" />
+            </svg>
+            <span>Tema</span>
+          </button>
+          <div class="theme-dropdown" id="theme-dropdown">
+            <button data-theme="theme-dark-glass" class="theme-option active">Glassmorphic Dark</button>
+            <button data-theme="theme-emerald-calm" class="theme-option">Emerald Calm</button>
+            <button data-theme="theme-sunset-aurora" class="theme-option">Sunset Aurora</button>
+            <button data-theme="theme-frost-light" class="theme-option">Frost Light</button>
+          </div>
+        </div>
+
+        <!-- Clock Widget Header Quick Info -->
+        <div id="quick-clock" class="quick-clock">
+          <span id="clock-time">00:00:00</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="dashboard-grid">
+      
+      <!-- COLUMN 1: Timer & Notes -->
+      <div class="grid-column">
+        <!-- Widget: Focus Timer (Pomodoro) -->
+        <section class="card glass-card widget-pomodoro" id="widget-pomodoro">
+          <div class="card-header">
+            <h3>Enfoque Pomodoro</h3>
+            <span class="badge" id="pomodoro-phase">Sesión</span>
+          </div>
+          <div class="card-body pomodoro-content">
+            <div class="timer-display-container">
+              <svg class="progress-ring" width="200" height="200">
+                <circle class="progress-ring__circle-bg" stroke="rgba(255,255,255,0.05)" stroke-width="8" fill="transparent" r="88" cx="100" cy="100"/>
+                <circle class="progress-ring__circle" id="timer-progress-bar" stroke="var(--accent-color)" stroke-dasharray="552.92" stroke-dashoffset="0" stroke-width="8" stroke-linecap="round" fill="transparent" r="88" cx="100" cy="100"/>
+              </svg>
+              <div class="timer-digits" id="timer-digits">25:00</div>
+            </div>
+            
+            <div class="timer-controls">
+              <button class="btn btn-secondary" id="pomodoro-short" data-time="5">Pausa Corta</button>
+              <button class="btn btn-primary btn-play" id="pomodoro-toggle" aria-label="Iniciar/Pausar">
+                <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+                <svg class="pause-icon hidden" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                </svg>
+              </button>
+              <button class="btn btn-secondary" id="pomodoro-long" data-time="15">Pausa Larga</button>
+            </div>
+
+            <div class="timer-actions-row">
+              <button class="btn-text" id="pomodoro-reset">Reiniciar</button>
+              <button class="btn-text" id="pomodoro-work" data-time="25">Enfoque (25m)</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Widget: Quick Notes -->
+        <section class="card glass-card widget-notes" id="widget-notes">
+          <div class="card-header">
+            <h3>Notas Rápidas</h3>
+            <span class="note-save-status" id="note-status">Auto-guardado</span>
+          </div>
+          <div class="card-body notes-content">
+            <textarea id="quick-note-input" placeholder="Escribe tus ideas aquí... Se guardan automáticamente."></textarea>
+          </div>
+        </section>
+      </div>
+
+      <!-- COLUMN 2: Tasks & Stats -->
+      <div class="grid-column">
+        <!-- Widget: Task Manager -->
+        <section class="card glass-card widget-tasks" id="widget-tasks">
+          <div class="card-header">
+            <div>
+              <h3>Gestor de Tareas</h3>
+              <p class="card-subtitle">Organiza tus metas diarias</p>
+            </div>
+            <div class="progress-info">
+              <span id="tasks-percent">0%</span>
+              <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="tasks-progress-fill" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+          <div class="card-body tasks-content">
+            <form id="task-form" class="task-input-form">
+              <input type="text" id="task-input" placeholder="Añadir una nueva tarea..." required>
+              <select id="task-priority" class="task-priority-select">
+                <option value="low">Baja</option>
+                <option value="medium" selected>Media</option>
+                <option value="high">Alta</option>
+              </select>
+              <button type="submit" class="btn btn-primary" aria-label="Añadir tarea">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="icon-sm">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+              </button>
+            </form>
+
+            <div class="tasks-filter-bar">
+              <button class="filter-tab active" data-filter="all">Todas</button>
+              <button class="filter-tab" data-filter="active">Pendientes</button>
+              <button class="filter-tab" data-filter="completed">Completadas</button>
+            </div>
+
+            <ul class="task-list" id="task-list">
+              <!-- Elementos dinámicos en JS -->
+            </ul>
+          </div>
+        </section>
+
+        <!-- Widget: Stats/Analytics -->
+        <section class="card glass-card widget-stats" id="widget-stats">
+          <div class="card-header">
+            <h3>Estadísticas Semanales</h3>
+            <p class="card-subtitle">Rendimiento e historial</p>
+          </div>
+          <div class="card-body stats-content">
+            <div class="stats-overview">
+              <div class="stat-box">
+                <span class="stat-num" id="stat-completed-tasks">0</span>
+                <span class="stat-label">Tareas completadas</span>
+              </div>
+              <div class="stat-box">
+                <span class="stat-num" id="stat-active-habits">0</span>
+                <span class="stat-label">Hábitos en racha</span>
+              </div>
+            </div>
+            
+            <div class="chart-container">
+              <svg id="weekly-chart" class="weekly-chart" viewBox="0 0 400 150">
+                <!-- Se dibuja mediante JavaScript -->
+              </svg>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- COLUMN 3: Habit Tracker & Weather -->
+      <div class="grid-column">
+        <!-- Widget: Habit Tracker -->
+        <section class="card glass-card widget-habits" id="widget-habits">
+          <div class="card-header">
+            <div>
+              <h3>Rastreador de Hábitos</h3>
+              <p class="card-subtitle">Construye constancia semanal</p>
+            </div>
+          </div>
+          <div class="card-body habits-content">
+            <form id="habit-form" class="habit-input-form">
+              <input type="text" id="habit-input" placeholder="Añadir hábito..." required>
+              <button type="submit" class="btn btn-primary" aria-label="Añadir hábito">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="icon-sm">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+              </button>
+            </form>
+
+            <div class="habits-week-header">
+              <span class="habit-name-col">Hábito</span>
+              <span class="habit-day-lbl">L</span>
+              <span class="habit-day-lbl">M</span>
+              <span class="habit-day-lbl">M</span>
+              <span class="habit-day-lbl">J</span>
+              <span class="habit-day-lbl">V</span>
+              <span class="habit-day-lbl">S</span>
+              <span class="habit-day-lbl">D</span>
+              <span class="habit-streak-col">Racha</span>
+            </div>
+
+            <div class="habits-list" id="habits-list">
+              <!-- Elementos dinámicos en JS -->
+            </div>
+          </div>
+        </section>
+
+        <!-- Widget: Clima -->
+        <section class="card glass-card widget-weather" id="widget-weather">
+          <div class="card-header">
+            <h3>Clima & Entorno</h3>
+            <span id="weather-city">Madrid, ES</span>
+          </div>
+          <div class="card-body weather-content">
+            <div class="weather-search">
+              <input type="text" id="weather-search-input" placeholder="Buscar ciudad...">
+              <button id="weather-search-btn" aria-label="Buscar clima">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                </svg>
+              </button>
+            </div>
+            
+            <div class="weather-display">
+              <div class="weather-temp-container">
+                <div class="weather-temp" id="weather-temp">22°C</div>
+                <div class="weather-condition" id="weather-condition">Despejado</div>
+              </div>
+              <div class="weather-visual" id="weather-icon-container">
+                <!-- SVG Dinámico -->
+                <svg class="weather-icon animate-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="5" fill="rgba(255, 235, 59, 0.2)" stroke="var(--accent-color)" />
+                  <path stroke-linecap="round" d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+                </svg>
+              </div>
+            </div>
+
+            <div class="weather-details">
+              <div class="detail-item">
+                <span class="detail-label">Humedad</span>
+                <span class="detail-val" id="weather-humidity">45%</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Viento</span>
+                <span class="detail-val" id="weather-wind">12 km/h</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+    </main>
+    
+    <footer class="app-footer-bar">
+      <p>&copy; 2026 ZenHub. Hecho con ❤️ para una vida enfocada y productiva.</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
