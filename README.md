@@ -34,7 +34,6 @@
 
 ### Opción 1: Navegador Directo (⚡ Recomendado)
 
-\`\`\`bash
 # Solo requiere un navegador moderno
 # Navegadores soportados:
 # ✅ Chrome 90+
