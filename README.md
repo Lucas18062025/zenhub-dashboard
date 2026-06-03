@@ -51,27 +51,20 @@ index.html  # ← Double-click o arrastra al navegador
 
 ### Opción 2: Servidor Local (Python)
 
-\`\`\`bash
 # Si tienes Python instalado
 cd zenhub-dashboard
 python -m http.server 8000
 
 # Luego abre en navegador:
 # http://localhost:8000
-\`\`\`
 
 ### Opción 3: Live Server (VS Code)
 
-\`\`\`bash
 # Con la extensión "Live Server" instalada
 # Click derecho en index.html → Open with Live Server
-\`\`\`
-
----
 
 ## 🛠️ Estructura del Proyecto
 
-\`\`\`
 zenhub-dashboard/
 ├── index.html       # Estructura HTML
 ├── style.css        # Estilos (Tailwind-like)
@@ -79,7 +72,6 @@ zenhub-dashboard/
 ├── assets/          # Recursos (screenshots, etc)
 ├── README.md        # Este archivo
 └── LICENSE          # MIT License
-\`\`\`
 
 ---
 
@@ -108,7 +100,6 @@ zenhub-dashboard/
 
 ## 🎨 Stack Tecnológico
 
-\`\`\`
 Frontend:
   • HTML5
   • CSS3 (Gradientes, Flexbox, Grid)
@@ -119,7 +110,6 @@ Storage:
   
 APIs Externas:
   • OpenWeatherMap (clima)
-\`\`\`
 
 ---
 
