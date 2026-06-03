@@ -1,4 +1,3 @@
-"
 <div align="center">
   
   ![ZenHub](https://img.shields.io/badge/ZenHub-Dashboard-blue?style=for-the-badge)
@@ -156,4 +155,3 @@ San Miguel de Tucumán, Argentina
 **Hecho con ❤️ para una vida más productiva y segura**
 
 </div>
-"@ | Out-File README.md -Encoding UTF8
