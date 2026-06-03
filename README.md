@@ -1,4 +1,4 @@
-@"
+"
 <div align="center">
   
   ![ZenHub](https://img.shields.io/badge/ZenHub-Dashboard-blue?style=for-the-badge)
@@ -147,7 +147,6 @@ MIT License - Ver archivo [LICENSE](LICENSE)
 Analista de Ciberseguridad | Ethical Hacker  
 San Miguel de Tucumán, Argentina  
 
-📧 [lucaslean1806@gmail.com](mailto:lucaslean1806@gmail.com)  
 🔗 [GitHub](https://github.com/Lucas18062025) | [LinkedIn](https://linkedin.com/in/lucas-villagra-cybersecurity)  
 
 ---
