@@ -13,7 +13,7 @@
 
 ## 📸 Vista Previa
 
-![ZenHub Dashboard Preview](https://raw.githubusercontent.com/Lucas18062025/zenhub-dashboard/main/assets/preview.png)
+![ZenHub Dashboard Preview](https://raw.githubusercontent.com/Lucas18062025/zenhub-dashboard/main/preview.png)
 
 ---
 
