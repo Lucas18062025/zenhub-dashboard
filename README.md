@@ -62,19 +62,17 @@ python -m http.server 8000
 # Con la extensión "Live Server" instalada
 # Click derecho en index.html → Open with Live Server
 
-````
-## 🛠️ Estructura del Proyecto
-
-````
-📁 zenhub-dashboard/
-  ├─ 📄 index.html          Estructura HTML
-  ├─ 🎨 style.css           Estilos (Tailwind-like)
-  ├─ ⚙️  app.js              Lógica principal
-  ├─ 📁 assets/             Recursos (screenshots)
-  ├─ 📖 README.md           Documentación
-  └─ ⚖️  LICENSE             MIT License
-````
-````
+<pre style="background: #0d1117; padding: 16px; border-radius: 8px; overflow-x: auto; border: 1px solid #30363d;">
+<code style="color: #c9d1d9; font-family: monospace;">
+📁 <strong>zenhub-dashboard/</strong>
+  ├─ 📄 index.html          <span style="color: #7ee787;">Estructura HTML</span>
+  ├─ 🎨 style.css           <span style="color: #7ee787;">Estilos</span>
+  ├─ ⚙️  app.js              <span style="color: #7ee787;">Lógica principal</span>
+  ├─ 📁 assets/             <span style="color: #7ee787;">Recursos</span>
+  ├─ 📖 README.md           <span style="color: #7ee787;">Documentación</span>
+  └─ ⚖️  LICENSE             <span style="color: #7ee787;">MIT License</span>
+</code>
+</pre>
 
 ## 💡 Cómo Usar
 
