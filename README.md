@@ -131,13 +131,14 @@ python -m http.server 8000
 - [x] Bloc de notas rápido con auto-guardado en LocalStorage
 - [x] Gráfica de rendimiento e historial semanal en SVG dinámico
 - [x] Estandarización de codificación UTF-8 y configuración `.editorconfig` / `.gitattributes`
+- [x] Exportación e importación de tareas y datos en formato JSON y CSV
+- [x] Generación y exportación de reporte diario de productividad a PDF (`html2pdf.js`)
 
 ### 🔮 Próximas Funcionalidades
-- [ ] Exportación e importación de tareas y datos en formato JSON / CSV
-- [ ] Exportación de reporte diario a PDF
 - [ ] Sincronización opcional con Google Calendar
 - [ ] Notificaciones sonoras personalizables y notificaciones nativas del navegador
 - [ ] Soporte offline completo y PWA (Progressive Web App)
+- [ ] Integración con Slack / Discord mediante Webhooks
 - [ ] Integración con Slack / Discord mediante Webhooks
 
 ---

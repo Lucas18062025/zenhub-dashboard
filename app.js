@@ -4,6 +4,264 @@
    ========================================================================== */
 
 /**
+ * DataManager - Gestiona exportación/importación JSON, CSV y reportes PDF
+ */
+class DataManager {
+  /**
+   * Export full application state as JSON
+   * @param {Object} state
+   */
+  exportJSON(state) {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
+    const downloadAnchor = document.createElement('a');
+    const dateStr = new Date().toISOString().split('T')[0];
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", `zenhub_backup_${dateStr}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+  }
+
+  /**
+   * Export task list as CSV
+   * @param {Array} tasks
+   */
+  exportCSV(tasks) {
+    const headers = ["ID", "Tarea", "Prioridad", "Estado"];
+    const rows = tasks.map(t => [
+      t.id,
+      `"${t.text.replace(/"/g, '""')}"`,
+      t.priority || "medium",
+      t.completed ? "Completada" : "Pendiente"
+    ]);
+
+    const csvContent = [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+    const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    
+    const downloadAnchor = document.createElement('a');
+    const dateStr = new Date().toISOString().split('T')[0];
+    downloadAnchor.setAttribute("href", url);
+    downloadAnchor.setAttribute("download", `zenhub_tareas_${dateStr}.csv`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  /**
+   * Import JSON backup file
+   * @param {File} file
+   * @returns {Promise<Object>}
+   */
+  importJSON(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const parsedData = JSON.parse(e.target.result);
+          if (!parsedData || typeof parsedData !== 'object') {
+            throw new Error("Formato JSON inválido");
+          }
+          if (!Array.isArray(parsedData.tasks) || !Array.isArray(parsedData.habits)) {
+            throw new Error("El archivo no contiene la estructura de datos de ZenHub.");
+          }
+          resolve(parsedData);
+        } catch (err) {
+          reject(err);
+        }
+      };
+      reader.onerror = () => reject(new Error("Error leyendo el archivo"));
+      reader.readAsText(file);
+    });
+  }
+
+  /**
+   * Import CSV task list
+   * @param {File} file
+   * @returns {Promise<Array>}
+   */
+  importCSV(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const text = e.target.result;
+          const lines = text.split(/\r\n|\n/).filter(line => line.trim() !== '');
+          if (lines.length <= 1) {
+            throw new Error("El archivo CSV no contiene filas de datos.");
+          }
+
+          const importedTasks = [];
+          const startIdx = lines[0].toLowerCase().includes('tarea') || lines[0].toLowerCase().includes('id') ? 1 : 0;
+
+          for (let i = startIdx; i < lines.length; i++) {
+            const line = lines[i];
+            const cols = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || line.split(',');
+            if (cols.length > 0) {
+              let taskText = cols[1] ? cols[1].replace(/^"|"$/g, '').trim() : cols[0].replace(/^"|"$/g, '').trim();
+              if (taskText) {
+                let priority = 'medium';
+                if (cols[2]) {
+                  const pVal = cols[2].replace(/^"|"$/g, '').trim().toLowerCase();
+                  if (['low', 'baja'].includes(pVal)) priority = 'low';
+                  if (['high', 'alta'].includes(pVal)) priority = 'high';
+                }
+                let completed = false;
+                if (cols[3]) {
+                  const cVal = cols[3].replace(/^"|"$/g, '').trim().toLowerCase();
+                  if (['completada', 'true', 'si', 'sí', '1'].includes(cVal)) completed = true;
+                }
+
+                importedTasks.push({
+                  id: Date.now() + i,
+                  text: taskText,
+                  priority: priority,
+                  completed: completed
+                });
+              }
+            }
+          }
+          resolve(importedTasks);
+        } catch (err) {
+          reject(err);
+        }
+      };
+      reader.onerror = () => reject(new Error("Error al leer el archivo CSV"));
+      reader.readAsText(file);
+    });
+  }
+
+  /**
+   * Generate Daily PDF Report using html2pdf.js
+   * @param {Object} state
+   */
+  generatePDFReport(state) {
+    if (typeof html2pdf === 'undefined') {
+      alert("La librería para generar PDF aún no ha cargado. Por favor, reintenta.");
+      return;
+    }
+
+    const todayStr = new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    const dateFormatted = todayStr.charAt(0).toUpperCase() + todayStr.slice(1);
+
+    const completedTasks = state.tasks.filter(t => t.completed);
+    const percentTasks = state.tasks.length > 0 ? Math.round((completedTasks.length / state.tasks.length) * 100) : 0;
+
+    const reportContainer = document.createElement('div');
+    reportContainer.style.padding = '30px';
+    reportContainer.style.fontFamily = "'Inter', Arial, sans-serif";
+    reportContainer.style.color = '#1e293b';
+    reportContainer.style.background = '#ffffff';
+
+    let habitsHtml = '';
+    state.habits.forEach(h => {
+      const completedDays = h.history.filter(Boolean).length;
+      habitsHtml += `
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <td style="padding: 10px; font-weight: 500;">${this.escapeHtml(h.name)}</td>
+          <td style="padding: 10px; text-align: center;">${completedDays} / 7 días</td>
+        </tr>
+      `;
+    });
+
+    let tasksHtml = '';
+    state.tasks.forEach(t => {
+      tasksHtml += `
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <td style="padding: 8px;">${t.completed ? '✅' : '⏳'}</td>
+          <td style="padding: 8px; font-weight: 500; ${t.completed ? 'text-decoration: line-through; color: #94a3b8;' : ''}">${this.escapeHtml(t.text)}</td>
+          <td style="padding: 8px; text-align: center; font-size: 12px; text-transform: uppercase;">${t.priority}</td>
+        </tr>
+      `;
+    });
+
+    reportContainer.innerHTML = `
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #6366f1; padding-bottom: 15px; margin-bottom: 25px;">
+        <div>
+          <h1 style="margin: 0; color: #4338ca; font-size: 26px; font-family: 'Outfit', sans-serif;">🎯 ZenHub Dashboard</h1>
+          <p style="margin: 5px 0 0 0; color: #64748b; font-size: 14px;">Reporte Diario de Productividad</p>
+        </div>
+        <div style="text-align: right;">
+          <p style="margin: 0; font-weight: 600; color: #1e293b; font-size: 14px;">${dateFormatted}</p>
+          <p style="margin: 5px 0 0 0; color: #64748b; font-size: 12px;">Generado automáticamente</p>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 15px; margin-bottom: 30px;">
+        <div style="flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 15px; text-align: center;">
+          <div style="font-size: 24px; font-weight: 700; color: #4338ca;">${percentTasks}%</div>
+          <div style="font-size: 12px; color: #64748b; margin-top: 4px;">Progreso de Tareas</div>
+        </div>
+        <div style="flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 15px; text-align: center;">
+          <div style="font-size: 24px; font-weight: 700; color: #10b981;">${completedTasks.length} / ${state.tasks.length}</div>
+          <div style="font-size: 12px; color: #64748b; margin-top: 4px;">Tareas Completadas</div>
+        </div>
+        <div style="flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 15px; text-align: center;">
+          <div style="font-size: 24px; font-weight: 700; color: #f59e0b;">${state.habits.length}</div>
+          <div style="font-size: 12px; color: #64748b; margin-top: 4px;">Hábitos Monitoreados</div>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 30px;">
+        <h3 style="color: #1e293b; border-bottom: 1px solid #cbd5e1; padding-bottom: 8px; margin-bottom: 12px;">📋 Lista de Tareas</h3>
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+          <thead>
+            <tr style="background: #f1f5f9; text-align: left; color: #475569;">
+              <th style="padding: 8px; width: 40px;">Estado</th>
+              <th style="padding: 8px;">Tarea</th>
+              <th style="padding: 8px; width: 80px; text-align: center;">Prioridad</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tasksHtml || '<tr><td colspan="3" style="padding: 15px; text-align: center; color: #94a3b8;">No hay tareas registradas</td></tr>'}
+          </tbody>
+        </table>
+      </div>
+
+      <div style="margin-bottom: 30px;">
+        <h3 style="color: #1e293b; border-bottom: 1px solid #cbd5e1; padding-bottom: 8px; margin-bottom: 12px;">🎯 Rastreador de Hábitos</h3>
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+          <thead>
+            <tr style="background: #f1f5f9; text-align: left; color: #475569;">
+              <th style="padding: 8px;">Hábito</th>
+              <th style="padding: 8px; text-align: center; width: 120px;">Cumplimiento Semanal</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${habitsHtml || '<tr><td colspan="2" style="padding: 15px; text-align: center; color: #94a3b8;">No hay hábitos registrados</td></tr>'}
+          </tbody>
+        </table>
+      </div>
+
+      <div>
+        <h3 style="color: #1e293b; border-bottom: 1px solid #cbd5e1; padding-bottom: 8px; margin-bottom: 12px;">📝 Notas Rápidas</h3>
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; font-size: 13px; white-space: pre-wrap; color: #334155;">
+          ${this.escapeHtml(state.notes) || 'Sin notas guardadas para el día de hoy.'}
+        </div>
+      </div>
+    `;
+
+    const opt = {
+      margin:       10,
+      filename:     `Reporte_ZenHub_${new Date().toISOString().split('T')[0]}.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2 },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().set(opt).from(reportContainer).save();
+  }
+
+  escapeHtml(text) {
+    if (!text) return '';
+    return text.replace(/[&<>"']/g, function(m) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+    });
+  }
+}
+
+/**
  * WeatherManager - Obtiene clima en tiempo real sin API key
  * Usa Open-Meteo (gratuito, sin límites)
  */
@@ -236,7 +494,89 @@ document.addEventListener('DOMContentLoaded', () => {
   // Close dropdown on outside click
   document.addEventListener('click', () => {
     themeDropdown.classList.remove('show');
+    if (dataDropdown) dataDropdown.classList.remove('show');
   });
+
+  // --- DATA & REPORT CONTROLLER ---
+  const dataBtn = document.getElementById('data-btn');
+  const dataDropdown = document.getElementById('data-dropdown');
+  const btnExportPdf = document.getElementById('btn-export-pdf');
+  const btnExportJson = document.getElementById('btn-export-json');
+  const btnExportCsv = document.getElementById('btn-export-csv');
+  const btnImportJson = document.getElementById('btn-import-json');
+  const btnImportCsv = document.getElementById('btn-import-csv');
+  const inputImportJson = document.getElementById('input-import-json');
+  const inputImportCsv = document.getElementById('input-import-csv');
+
+  const dataManager = new DataManager();
+
+  if (dataBtn && dataDropdown) {
+    dataBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dataDropdown.classList.toggle('show');
+      themeDropdown.classList.remove('show');
+    });
+
+    btnExportPdf.addEventListener('click', () => {
+      dataDropdown.classList.remove('show');
+      dataManager.generatePDFReport(state);
+    });
+
+    btnExportJson.addEventListener('click', () => {
+      dataDropdown.classList.remove('show');
+      dataManager.exportJSON(state);
+    });
+
+    btnExportCsv.addEventListener('click', () => {
+      dataDropdown.classList.remove('show');
+      dataManager.exportCSV(state.tasks);
+    });
+
+    btnImportJson.addEventListener('click', () => {
+      dataDropdown.classList.remove('show');
+      inputImportJson.click();
+    });
+
+    btnImportCsv.addEventListener('click', () => {
+      dataDropdown.classList.remove('show');
+      inputImportCsv.click();
+    });
+
+    inputImportJson.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      try {
+        const newState = await dataManager.importJSON(file);
+        state = { ...state, ...newState };
+        saveState();
+        document.body.className = state.theme;
+        renderTasks();
+        renderHabits();
+        updateStatsWidget();
+        renderWeeklyChart();
+        if (noteInput) noteInput.value = state.notes || '';
+        alert("¡Copia de seguridad importada con éxito!");
+      } catch (err) {
+        alert(`Error al importar JSON: ${err.message}`);
+      }
+      inputImportJson.value = '';
+    });
+
+    inputImportCsv.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      try {
+        const importedTasks = await dataManager.importCSV(file);
+        state.tasks = [...state.tasks, ...importedTasks];
+        saveState();
+        renderTasks();
+        alert(`¡Se importaron ${importedTasks.length} tareas desde el archivo CSV!`);
+      } catch (err) {
+        alert(`Error al importar CSV: ${err.message}`);
+      }
+      inputImportCsv.value = '';
+    });
+  }
 
   // --- CLOCK, DATE AND DYNAMIC GREETING ---
   const greetingText = document.getElementById('greeting-text');
