@@ -50,6 +50,57 @@ class DataManager {
   }
 
   /**
+   * Export tasks as iCal (.ics) for Google Calendar / Apple Calendar / Outlook
+   * @param {Array} tasks
+   */
+  exportICS(tasks) {
+    const now = new Date();
+    const formatDate = (d) => d.toISOString().replace(/-|:|\.\d+/g, '');
+    
+    let icsContent = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//ZenHub Dashboard//Productivity App//ES',
+      'CALSCALE:GREGORIAN',
+      'METHOD:PUBLISH'
+    ];
+
+    const pendingTasks = tasks.filter(t => !t.completed);
+    if (pendingTasks.length === 0) {
+      alert("No hay tareas pendientes para exportar al calendario.");
+      return;
+    }
+
+    pendingTasks.forEach((t, i) => {
+      const start = new Date(now.getTime() + (i + 1) * 3600000);
+      const end = new Date(start.getTime() + 1800000);
+      icsContent.push(
+        'BEGIN:VEVENT',
+        `UID:zenhub-task-${t.id}@zenhub.app`,
+        `DTSTAMP:${formatDate(now)}`,
+        `DTSTART:${formatDate(start)}`,
+        `DTEND:${formatDate(end)}`,
+        `SUMMARY:🎯 ${t.text.replace(/,/g, '\\,')}`,
+        `DESCRIPTION:Tarea de ZenHub. Prioridad: ${t.priority || 'media'}`,
+        'END:VEVENT'
+      );
+    });
+
+    icsContent.push('END:VCALENDAR');
+
+    const blob = new Blob([icsContent.join('\r\n')], { type: 'text/calendar;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const downloadAnchor = document.createElement('a');
+    const dateStr = now.toISOString().split('T')[0];
+    downloadAnchor.setAttribute("href", url);
+    downloadAnchor.setAttribute("download", `zenhub_calendario_${dateStr}.ics`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  /**
    * Import JSON backup file
    * @param {File} file
    * @returns {Promise<Object>}
@@ -532,6 +583,14 @@ document.addEventListener('DOMContentLoaded', () => {
       dataManager.exportCSV(state.tasks);
     });
 
+    const btnExportIcs = document.getElementById('btn-export-ics');
+    if (btnExportIcs) {
+      btnExportIcs.addEventListener('click', () => {
+        dataDropdown.classList.remove('show');
+        dataManager.exportICS(state.tasks);
+      });
+    }
+
     btnImportJson.addEventListener('click', () => {
       dataDropdown.classList.remove('show');
       inputImportJson.click();
@@ -648,33 +707,152 @@ document.addEventListener('DOMContentLoaded', () => {
     timerProgressBar.style.strokeDashoffset = offset;
   }
 
-  function playZenChime() {
+  // Desktop Notifications Controller
+  const toggleNotificationsBtn = document.getElementById('toggle-notifications');
+  const notificationStatusText = document.getElementById('notification-status-text');
+
+  function updateNotificationUI() {
+    if (!('Notification' in window)) {
+      if (notificationStatusText) notificationStatusText.textContent = "No soportado";
+      return;
+    }
+    if (Notification.permission === 'granted') {
+      if (notificationStatusText) notificationStatusText.textContent = "Activadas";
+      if (toggleNotificationsBtn) toggleNotificationsBtn.classList.add('active');
+    } else if (Notification.permission === 'denied') {
+      if (notificationStatusText) notificationStatusText.textContent = "Bloqueadas";
+      if (toggleNotificationsBtn) toggleNotificationsBtn.classList.remove('active');
+    } else {
+      if (notificationStatusText) notificationStatusText.textContent = "Activar";
+      if (toggleNotificationsBtn) toggleNotificationsBtn.classList.remove('active');
+    }
+  }
+
+  if (toggleNotificationsBtn) {
+    toggleNotificationsBtn.addEventListener('click', async () => {
+      if (!('Notification' in window)) {
+        alert("Tu navegador no soporta notificaciones de escritorio.");
+        return;
+      }
+      if (Notification.permission === 'granted') {
+        alert("Las notificaciones de escritorio ya están activadas.");
+      } else {
+        const permission = await Notification.requestPermission();
+        updateNotificationUI();
+        if (permission === 'granted') {
+          sendDesktopNotification("🎯 ZenHub", "¡Notificaciones de escritorio activadas correctamente!");
+        }
+      }
+    });
+  }
+
+  updateNotificationUI();
+
+  function sendDesktopNotification(title, body) {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      try {
+        new Notification(title, { body: body });
+      } catch (e) {
+        console.warn("Error enviando notificación nativa:", e);
+      }
+    }
+  }
+
+  // Audio Synthesizer
+  const pomodoroSoundSelect = document.getElementById('pomodoro-sound-select');
+  const pomodoroTestSound = document.getElementById('pomodoro-test-sound');
+
+  if (state.soundTheme && pomodoroSoundSelect) {
+    pomodoroSoundSelect.value = state.soundTheme;
+  }
+
+  if (pomodoroSoundSelect) {
+    pomodoroSoundSelect.addEventListener('change', () => {
+      state.soundTheme = pomodoroSoundSelect.value;
+      saveState();
+    });
+  }
+
+  if (pomodoroTestSound) {
+    pomodoroTestSound.addEventListener('click', () => {
+      const selectedSound = pomodoroSoundSelect ? pomodoroSoundSelect.value : 'zen';
+      playZenChime(selectedSound);
+    });
+  }
+
+  function playZenChime(type = null) {
+    const soundType = type || (pomodoroSoundSelect ? pomodoroSoundSelect.value : (state.soundTheme || 'zen'));
+    if (soundType === 'silent') return;
+
     try {
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const now = ctx.currentTime;
 
-      const osc1 = ctx.createOscillator();
-      const gain1 = ctx.createGain();
-      osc1.type = 'sine';
-      osc1.frequency.setValueAtTime(523.25, ctx.currentTime);
-      gain1.gain.setValueAtTime(0.12, ctx.currentTime);
-      gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.2);
-      osc1.connect(gain1);
-      gain1.connect(ctx.destination);
-      osc1.start();
-      osc1.stop(ctx.currentTime + 1.2);
+      if (soundType === 'zen') {
+        const osc1 = ctx.createOscillator();
+        const gain1 = ctx.createGain();
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(523.25, now);
+        gain1.gain.setValueAtTime(0.15, now);
+        gain1.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+        osc1.connect(gain1);
+        gain1.connect(ctx.destination);
+        osc1.start();
+        osc1.stop(now + 1.2);
 
-      const osc2 = ctx.createOscillator();
-      const gain2 = ctx.createGain();
-      osc2.type = 'sine';
-      osc2.frequency.setValueAtTime(659.25, ctx.currentTime + 0.2);
-      gain2.gain.setValueAtTime(0.12, ctx.currentTime + 0.2);
-      gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.5);
-      osc2.connect(gain2);
-      gain2.connect(ctx.destination);
-      osc2.start(ctx.currentTime + 0.2);
-      osc2.stop(ctx.currentTime + 1.5);
+        const osc2 = ctx.createOscillator();
+        const gain2 = ctx.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(659.25, now + 0.2);
+        gain2.gain.setValueAtTime(0.15, now + 0.2);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
+        osc2.connect(gain2);
+        gain2.connect(ctx.destination);
+        osc2.start(now + 0.2);
+        osc2.stop(now + 1.5);
+
+      } else if (soundType === 'marimba') {
+        [392.00, 523.25, 659.25].forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.12);
+          gain.gain.setValueAtTime(0.2, now + idx * 0.12);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 0.4);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now + idx * 0.12);
+          osc.stop(now + idx * 0.12 + 0.4);
+        });
+
+      } else if (soundType === 'pulse') {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(220, now);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.8);
+
+      } else if (soundType === 'beep') {
+        [0, 0.2, 0.4].forEach(offset => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(880, now + offset);
+          gain.gain.setValueAtTime(0.1, now + offset);
+          gain.gain.setValueAtTime(0.001, now + offset + 0.1);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now + offset);
+          osc.stop(now + offset + 0.1);
+        });
+      }
     } catch (e) {
-      console.warn("Web Audio API not allowed or supported:", e);
+      console.warn("Web Audio API error:", e);
     }
   }
 
@@ -697,9 +875,11 @@ document.addEventListener('DOMContentLoaded', () => {
         playZenChime();
 
         if (currentMode === 'work') {
+          sendDesktopNotification("🎯 ZenHub Pomodoro", "¡Sesión de enfoque completada! Tómate un respiro.");
           alert('¡Sesión de enfoque completada! Tómate un respiro.');
           setMode('short');
         } else {
+          sendDesktopNotification("🎯 ZenHub Pomodoro", "¡Descanso terminado! Es hora de enfocar.");
           alert('¡Descanso terminado! Es hora de enfocar.');
           setMode('work');
         }
@@ -819,15 +999,30 @@ document.addEventListener('DOMContentLoaded', () => {
           <span class="priority-indicator priority-${task.priority}" title="Prioridad: ${task.priority}"></span>
           <span class="task-text">${escapeHtml(task.text)}</span>
         </div>
-        <button class="task-delete-btn" aria-label="Eliminar tarea">
-          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-          </svg>
-        </button>
+        <div class="task-actions-right">
+          <button class="task-calendar-btn" title="Añadir a Google Calendar" aria-label="Añadir a Google Calendar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 9v7.5" />
+            </svg>
+          </button>
+          <button class="task-delete-btn" aria-label="Eliminar tarea">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </button>
+        </div>
       `;
 
       const checkbox = li.querySelector('.checkbox-custom');
       checkbox.addEventListener('change', () => toggleTask(task.id));
+
+      const calendarBtn = li.querySelector('.task-calendar-btn');
+      calendarBtn.addEventListener('click', () => {
+        const title = encodeURIComponent(`🎯 ${task.text}`);
+        const details = encodeURIComponent(`Tarea de ZenHub Dashboard.\nPrioridad: ${task.priority || 'media'}`);
+        const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}`;
+        window.open(gcalUrl, '_blank');
+      });
 
       const deleteBtn = li.querySelector('.task-delete-btn');
       deleteBtn.addEventListener('click', () => deleteTask(task.id));

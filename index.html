@@ -70,6 +70,9 @@
             <button id="btn-export-csv" class="data-option">
               <span>📊</span> Exportar Tareas (CSV)
             </button>
+            <button id="btn-export-ics" class="data-option">
+              <span>📅</span> Exportar Calendario (.ics)
+            </button>
             <div class="dropdown-divider"></div>
             <button id="btn-import-json" class="data-option">
               <span>📥</span> Importar Backup (JSON)
@@ -125,6 +128,31 @@
             <div class="timer-actions-row">
               <button class="btn-text" id="pomodoro-reset">Reiniciar</button>
               <button class="btn-text" id="pomodoro-work" data-time="25">Enfoque (25m)</button>
+            </div>
+
+            <!-- Sound & Notification Settings -->
+            <div class="pomodoro-settings-bar">
+              <div class="sound-selector-wrapper">
+                <select id="pomodoro-sound-select" class="sound-select" title="Tono de alarma">
+                  <option value="zen" selected>🔔 Campana Zen</option>
+                  <option value="marimba">🎶 Marimba Digital</option>
+                  <option value="pulse">🌊 Pulso Suave</option>
+                  <option value="beep">⏰ Beep Clásico</option>
+                  <option value="silent">🔇 Silencioso</option>
+                </select>
+                <button id="pomodoro-test-sound" class="btn-icon-sm" title="Probar sonido">
+                  <svg viewBox="0 0 24 24" fill="currentColor" class="icon-xs">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                </button>
+              </div>
+
+              <button id="toggle-notifications" class="btn-notification" title="Notificaciones de escritorio">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                </svg>
+                <span id="notification-status-text">Notificaciones</span>
+              </button>
             </div>
           </div>
         </section>
