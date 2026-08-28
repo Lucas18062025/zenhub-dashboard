@@ -12,7 +12,7 @@
 
 ## 📸 Vista Previa
 
-![ZenHub Dashboard Preview](assets/preview.png)
+![ZenHub Dashboard Preview](assets/zenhub.png)
 
 ---
 
