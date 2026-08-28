@@ -711,14 +711,23 @@ document.addEventListener('DOMContentLoaded', () => {
   const toggleNotificationsBtn = document.getElementById('toggle-notifications');
   const notificationStatusText = document.getElementById('notification-status-text');
 
+  if (state.notificationsEnabled === undefined) {
+    state.notificationsEnabled = true;
+  }
+
   function updateNotificationUI() {
     if (!('Notification' in window)) {
       if (notificationStatusText) notificationStatusText.textContent = "No soportado";
       return;
     }
     if (Notification.permission === 'granted') {
-      if (notificationStatusText) notificationStatusText.textContent = "Activadas";
-      if (toggleNotificationsBtn) toggleNotificationsBtn.classList.add('active');
+      if (state.notificationsEnabled) {
+        if (notificationStatusText) notificationStatusText.textContent = "Activadas";
+        if (toggleNotificationsBtn) toggleNotificationsBtn.classList.add('active');
+      } else {
+        if (notificationStatusText) notificationStatusText.textContent = "Silenciadas";
+        if (toggleNotificationsBtn) toggleNotificationsBtn.classList.remove('active');
+      }
     } else if (Notification.permission === 'denied') {
       if (notificationStatusText) notificationStatusText.textContent = "Bloqueadas";
       if (toggleNotificationsBtn) toggleNotificationsBtn.classList.remove('active');
@@ -735,12 +744,23 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       if (Notification.permission === 'granted') {
-        alert("Las notificaciones de escritorio ya están activadas.");
+        state.notificationsEnabled = !state.notificationsEnabled;
+        saveState();
+        updateNotificationUI();
+        if (state.notificationsEnabled) {
+          sendDesktopNotification("🎯 ZenHub", "¡Notificaciones de escritorio reactivadas!");
+        }
+      } else if (Notification.permission === 'denied') {
+        alert("Las notificaciones están bloqueadas en la configuración de tu navegador. Haz clic en el candado 🔒 de la barra de direcciones para habilitarlas.");
       } else {
         const permission = await Notification.requestPermission();
-        updateNotificationUI();
         if (permission === 'granted') {
+          state.notificationsEnabled = true;
+          saveState();
+          updateNotificationUI();
           sendDesktopNotification("🎯 ZenHub", "¡Notificaciones de escritorio activadas correctamente!");
+        } else {
+          updateNotificationUI();
         }
       }
     });
@@ -749,7 +769,7 @@ document.addEventListener('DOMContentLoaded', () => {
   updateNotificationUI();
 
   function sendDesktopNotification(title, body) {
-    if ('Notification' in window && Notification.permission === 'granted') {
+    if (state.notificationsEnabled !== false && 'Notification' in window && Notification.permission === 'granted') {
       try {
         new Notification(title, { body: body });
       } catch (e) {
