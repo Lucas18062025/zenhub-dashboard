@@ -204,6 +204,8 @@ body {
 
 /* --- CABECERA --- */
 .app-header {
+  position: relative;
+  z-index: 1000;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -286,6 +288,7 @@ body {
 /* Theme Selector */
 .theme-selector {
   position: relative;
+  z-index: 1001;
 }
 
 .selector-btn {
@@ -324,7 +327,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  z-index: 100;
+  z-index: 9999;
   box-shadow: 0 10px 25px rgba(0,0,0,0.5);
   opacity: 0;
   visibility: hidden;
@@ -360,6 +363,7 @@ body {
 /* Data & Reports Selector */
 .data-selector {
   position: relative;
+  z-index: 1001;
 }
 
 .data-dropdown {
@@ -374,7 +378,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  z-index: 100;
+  z-index: 9999;
   box-shadow: 0 10px 25px rgba(0,0,0,0.5);
   opacity: 0;
   visibility: hidden;
@@ -416,14 +420,18 @@ body {
   margin: 0.25rem 0;
 }
 
-.theme-frost-light .theme-dropdown {
+.theme-frost-light .theme-dropdown,
+.theme-frost-light .data-dropdown {
   background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
 }
-.theme-frost-light .theme-option {
+.theme-frost-light .theme-option,
+.theme-frost-light .data-option {
   color: #475569;
 }
-.theme-frost-light .theme-option:hover, .theme-frost-light .theme-option.active {
+.theme-frost-light .theme-option:hover,
+.theme-frost-light .theme-option.active,
+.theme-frost-light .data-option:hover {
   background: rgba(2, 132, 199, 0.1);
   color: var(--accent-color);
 }
