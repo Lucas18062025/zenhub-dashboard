@@ -70,10 +70,12 @@ python -m http.server 8000
 <pre style="background: #0d1117; padding: 16px; border-radius: 8px; overflow-x: auto; border: 1px solid #30363d;">
 <code style="color: #c9d1d9; font-family: monospace;">
 📁 <strong>zenhub-dashboard/</strong>
-  ├─ 📁 assets/             <span style="color: #7ee787;">Recursos visuales (preview.png)</span>
+  ├─ 📁 assets/             <span style="color: #7ee787;">Imágenes e iconos PWA (preview.png, icon-192, icon-512)</span>
   ├─ 📄 index.html          <span style="color: #7ee787;">Estructura HTML5 semántica</span>
   ├─ 🎨 style.css           <span style="color: #7ee787;">Estilos CSS3 con temas dinámicos (UTF-8)</span>
-  ├─ ⚙️  app.js              <span style="color: #7ee787;">Lógica JS y cliente Open-Meteo</span>
+  ├─ ⚙️  app.js              <span style="color: #7ee787;">Lógica JS, cliente Open-Meteo y PWA Controller</span>
+  ├─ ⚙️  sw.js               <span style="color: #7ee787;">Service Worker para soporte offline completo</span>
+  ├─ ⚙️  manifest.json       <span style="color: #7ee787;">Manifiesto de Progressive Web App (PWA)</span>
   ├─ ⚙️  .editorconfig       <span style="color: #7ee787;">Configuración de codificación y estilo</span>
   ├─ ⚙️  .gitattributes      <span style="color: #7ee787;">Reglas de codificación UTF-8 para Git</span>
   └─ 📖 README.md           <span style="color: #7ee787;">Documentación del proyecto</span>
@@ -111,9 +113,11 @@ python -m http.server 8000
 - HTML5 Semántico
 - CSS3 (Variables CSS, Flexbox, Grid, Glassmorphism, UTF-8)
 - Vanilla JavaScript (ES6+, Async/Await, Fetch API)
+- Progressive Web App (Service Worker `sw.js` + `manifest.json`)
 
 **Almacenamiento:**
 - LocalStorage API (Persistencia de estado y preferencias)
+- Cache Storage API (Almacenamiento offline de recursos PWA)
 
 **APIs Externas:**
 - **Open-Meteo Forecast & Geocoding API** (Clima en tiempo real y geolocalización gratuita sin API Key)
@@ -135,9 +139,9 @@ python -m http.server 8000
 - [x] Generación y exportación de reporte diario de productividad a PDF (`html2pdf.js`)
 - [x] Sincronización con Google Calendar (enlaces directos en tareas y exportación de calendario `.ics`)
 - [x] Notificaciones sonoras personalizables (5 tonos sintetizados) y notificaciones nativas de escritorio
+- [x] Soporte offline completo y PWA instalable (Progressive Web App con Service Worker y Manifest)
 
 ### 🔮 Próximas Funcionalidades
-- [ ] Soporte offline completo y PWA (Progressive Web App)
 - [ ] Integración con Slack / Discord mediante Webhooks
 
 ---

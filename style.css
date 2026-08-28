@@ -261,11 +261,39 @@ body {
   gap: 2.5rem;
 }
 
+.greeting-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 .greeting-container h2 {
   font-family: 'Outfit', sans-serif;
   font-size: 1.4rem;
   font-weight: 600;
   margin-bottom: 0.2rem;
+}
+
+.network-status-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+}
+
+.network-status-badge.online {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.network-status-badge.offline {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
 .subtext {

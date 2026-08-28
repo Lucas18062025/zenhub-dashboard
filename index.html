@@ -8,6 +8,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- PWA Meta Tags & Manifest -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="assets/icon-192.png">
+  <link rel="icon" type="image/png" href="assets/icon-192.png">
   <link rel="stylesheet" href="style.css">
   <!-- html2pdf.js para generación de reportes PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -30,7 +37,10 @@
           <h1>ZenHub</h1>
         </div>
         <div class="greeting-container">
-          <h2 id="greeting-text">Cargando saludo...</h2>
+          <div class="greeting-row">
+            <h2 id="greeting-text">Cargando saludo...</h2>
+            <span id="network-status" class="network-status-badge online" title="Estado de conexión">Online</span>
+          </div>
           <p id="date-text" class="subtext">Cargando fecha...</p>
         </div>
       </div>
@@ -79,6 +89,9 @@
             </button>
             <button id="btn-import-csv" class="data-option">
               <span>📥</span> Importar Tareas (CSV)
+            </button>
+            <button id="btn-install-pwa" class="data-option" style="display:none">
+              <span>📲</span> Instalar App (PWA)
             </button>
           </div>
           <input type="file" id="input-import-json" accept=".json" style="display:none">

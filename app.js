@@ -505,6 +505,52 @@ document.addEventListener('DOMContentLoaded', () => {
     updateStatsWidget();
   }
 
+  // --- PWA & SERVICE WORKER CONTROLLER ---
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js')
+      .then((reg) => console.log('[ServiceWorker] Registrado con éxito:', reg.scope))
+      .catch((err) => console.warn('[ServiceWorker] Fallo al registrar:', err));
+  }
+
+  // Network Status Monitor (Online / Offline)
+  const networkStatusBadge = document.getElementById('network-status');
+
+  function updateNetworkStatus() {
+    if (!networkStatusBadge) return;
+    if (navigator.onLine) {
+      networkStatusBadge.textContent = 'Online';
+      networkStatusBadge.className = 'network-status-badge online';
+    } else {
+      networkStatusBadge.textContent = 'Offline';
+      networkStatusBadge.className = 'network-status-badge offline';
+    }
+  }
+
+  window.addEventListener('online', updateNetworkStatus);
+  window.addEventListener('offline', updateNetworkStatus);
+  updateNetworkStatus();
+
+  // PWA Installation Handler
+  let deferredPrompt = null;
+  const btnInstallPWA = document.getElementById('btn-install-pwa');
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (btnInstallPWA) btnInstallPWA.style.display = 'flex';
+  });
+
+  if (btnInstallPWA) {
+    btnInstallPWA.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log(`[PWA] Elección del usuario: ${outcome}`);
+      deferredPrompt = null;
+      btnInstallPWA.style.display = 'none';
+    });
+  }
+
   // --- THEME CONTROLLER ---
   const themeBtn = document.getElementById('theme-btn');
   const themeDropdown = document.getElementById('theme-dropdown');
