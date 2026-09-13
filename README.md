@@ -2,9 +2,13 @@
 
   ![ZenHub](https://img.shields.io/badge/ZenHub-Dashboard-blue?style=for-the-badge)
   ![Status](https://img.shields.io/badge/Status-Active-brightgreen?style=for-the-badge)
+  ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
+  [![Live Demo](https://img.shields.io/badge/Demo-Live-8b5cf6?style=for-the-badge)](https://zenhub-dashboard.lucaslean1806.workers.dev/)
 
   # 🎯 ZenHub Dashboard
   **Panel de productividad integral con Pomodoro, gestor de tareas, rastreador de hábitos y clima en tiempo real**
+
+  **🌐 Demo en vivo:** https://zenhub-dashboard.lucaslean1806.workers.dev/
 
 </div>
 
@@ -76,6 +80,7 @@ python -m http.server 8000
   ├─ ⚙️  app.js              <span style="color: #7ee787;">Lógica JS, cliente Open-Meteo y PWA Controller</span>
   ├─ ⚙️  sw.js               <span style="color: #7ee787;">Service Worker para soporte offline completo</span>
   ├─ ⚙️  manifest.json       <span style="color: #7ee787;">Manifiesto de Progressive Web App (PWA)</span>
+  ├─ ☁️  wrangler.jsonc        <span style="color: #7ee787;">Deploy Cloudflare Workers (demo en vivo)</span>
   ├─ ⚙️  .editorconfig       <span style="color: #7ee787;">Configuración de codificación y estilo</span>
   ├─ ⚙️  .gitattributes      <span style="color: #7ee787;">Reglas de codificación UTF-8 para Git</span>
   └─ 📖 README.md           <span style="color: #7ee787;">Documentación del proyecto</span>

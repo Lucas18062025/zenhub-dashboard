@@ -1213,8 +1213,8 @@ document.addEventListener('DOMContentLoaded', () => {
                  class="habit-day-checkbox"
                  data-day="${dayIdx}"
                  ${checked ? 'checked' : ''}
-                 title="Día ${dayIdx + 1}"
-                 aria-label="${habit.name} - Día ${dayIdx + 1}">
+                  title="Día ${dayIdx + 1}"
+                  aria-label="${escapeHtml(habit.name)} - Día ${dayIdx + 1}">
         `;
       });
 
