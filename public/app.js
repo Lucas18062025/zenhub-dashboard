@@ -306,8 +306,8 @@ class DataManager {
 
   escapeHtml(text) {
     if (!text) return '';
-    return text.replace(/[&<>"']/g, function(m) {
-      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+    return text.replace(/[&<>"'`]/g, function(m) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;', '`': '&#x60;' }[m];
     });
   }
 }
@@ -1489,9 +1489,10 @@ document.addEventListener('DOMContentLoaded', () => {
       '<': '&lt;',
       '>': '&gt;',
       '"': '&quot;',
-      "'": '&#039;'
+      "'": '&#039;',
+      '`': '&#x60;'
     };
-    return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+    return text.replace(/[&<>"'`]/g, function(m) { return map[m]; });
   }
 
 });
